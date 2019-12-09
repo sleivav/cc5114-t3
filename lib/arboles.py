@@ -62,6 +62,9 @@ class Node:
         self.__class__ = otherNode.__class__
         self.__dict__ = otherNode.__dict__
 
+    def get_depth(self):
+        pass
+
 
 # esta clase representa todos los nodos quetienen 2 argumentos
 class BinaryNode(Node):
@@ -74,7 +77,9 @@ class BinaryNode(Node):
         super(BinaryNode, self).__init__(function)
         self.arguments.append(left)
         self.arguments.append(right)
-        
+
+    def get_depth(self):
+        return 1 + max([n.get_depth() for n in self.arguments])
 
 class AddNode(BinaryNode):
     def __init__(self, left, right):
@@ -136,6 +141,14 @@ class TerminalNode(Node):
         # la evaluacion de un nodo terminal es el valor que contiene
         return self.value
 
+    def get_depth(self):
+        return 1
+
+    def __eq__(self, other):
+        return self.value == other.value
+
+    def __hash__(self):
+        return hash(self.value)
 
 # un AST es un arbol que representa un programa, la idea aqui es tener
 # un generador, que pueda generar ASTs aleatorios
