@@ -3,9 +3,11 @@ from copy import deepcopy
 # random
 import random
 
+
 # esta funcion dice si el argumento es una funcion o no
 def is_function(f):
     return hasattr(f, "__call__")
+
 
 # esto nos permite recorrer una lista de a pedazos
 # ejemplo el input es [1,2,3,4,5,6,7,8]
@@ -14,6 +16,7 @@ def is_function(f):
 def chunks(iterable, n):
     for i in range(0, len(iterable), n):
         yield iterable[i:i + n]
+
 
 class Node:
     def __init__(self, function):
@@ -25,7 +28,7 @@ class Node:
         self.arguments = []
         
     # funcion para evaluar un nodo (calcular el resultado)
-    def eval(self):
+    def eval(self, variables=None):
         # es importante chequear que los argumentos que nos dieron
         # coincidan con los argumentos que necesitamos
         assert len(self.arguments) == self.num_arguments
@@ -38,7 +41,7 @@ class Node:
         # esto se llama `unpacking`.
         # lo necesitamos porque nuestra funcion recibe N argumentos
         # no una lista de tamaño N.
-        return self.operation(*[node.eval() for node in self.arguments])
+        return self.operation(*[node.eval(variables) for node in self.arguments])
     
     # hace una lista con todos los hijos
     def serialize(self):
@@ -80,6 +83,7 @@ class BinaryNode(Node):
 
     def get_depth(self):
         return 1 + max([n.get_depth() for n in self.arguments])
+
 
 class AddNode(BinaryNode):
     def __init__(self, left, right):
@@ -137,9 +141,12 @@ class TerminalNode(Node):
     def __repr__(self):
         return str(self.value)
     
-    def eval(self):
+    def eval(self, variables):
         # la evaluacion de un nodo terminal es el valor que contiene
-        return self.value
+        if isinstance(self.value, str):
+            return variables[self.value]
+        else:
+            return self.value
 
     def get_depth(self):
         return 1

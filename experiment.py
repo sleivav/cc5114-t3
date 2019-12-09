@@ -11,7 +11,7 @@ from lib.arboles import SubNode, AddNode, MultNode, MaxNode
 
 class Experiment:
     def __init__(self, population_sizes, mutation_rates, target, genetic_algorithm_class, selection_function,
-                 allowed_functions, allowed_parameters, consider_depth=False, allow_repetitions=True):
+                 allowed_functions, allowed_parameters, consider_depth=False, allow_repetitions=True, variables=None):
         self.allowed_parameters = allowed_parameters
         self.allowed_functions = allowed_functions
         self.population_sizes = population_sizes
@@ -25,6 +25,7 @@ class Experiment:
         self.selection_function = selection_function
         self.consider_depth = consider_depth
         self.allow_repetitions = allow_repetitions
+        self.variables = variables
 
     def run_experiment(self, create_heatmap=True):
         for i, population_size in enumerate(self.population_sizes):
@@ -38,6 +39,7 @@ class Experiment:
                     self.selection_function,
                     self.allowed_functions,
                     self.allowed_parameters,
+                    self.variables
                 )
                 genetic_algorithm_instance.evaluate_fitness(self.allow_repetitions, self.consider_depth)
                 self.run_iterations(genetic_algorithm_instance, i, j, 100, create_heatmap)
@@ -136,6 +138,11 @@ if __name__ == '__main__':
     elif args.problem == 'consider_repetitions':
         experiment = Experiment(population_sizes, mutation_rates, 65346, TreeGeneticAlgorithm, Tournament(5),
                                 [SubNode, AddNode, MaxNode, MultNode], [25, 7, 8, 100, 4, 2], False, False)
+        experiment.run_experiment(args.heatmap)
+        experiment.graph(args.heatmap)
+    elif args.problem == 'inclide_variables':
+        experiment = Experiment(population_sizes, mutation_rates, 65346, TreeGeneticAlgorithm, Tournament(5),
+                                [SubNode, AddNode, MaxNode, MultNode], [25, 7, 8, 100, 4, 2, 'x'], False, False, {'x': 6})
         experiment.run_experiment(args.heatmap)
         experiment.graph(args.heatmap)
     elif args.problem == 'maze':

@@ -44,7 +44,7 @@ class Tournament(SelectionFunction):
 
 class TreeGeneticAlgorithm:
     def __init__(self, target_result: int, population_size: int, mutation_rate: float, selection_function: SelectionFunction,
-                 allowed_functions: list, allowed_parameters: list):
+                 allowed_functions: list, allowed_parameters: list, variables: dict = None):
         self.target_result = target_result
         self.allowed_functions = allowed_functions
         self.allowed_parameters = allowed_parameters
@@ -55,6 +55,7 @@ class TreeGeneticAlgorithm:
         self.mutation_rate = mutation_rate
         self.differences = []
         self.depths = []
+        self.variables = variables
 
     def evaluate_fitness(self, allow_repetition=True, consider_depth=True) -> None:
         self.get_differences_and_depths()
@@ -99,9 +100,7 @@ class TreeGeneticAlgorithm:
 
     def get_ind_fitness(self, individual_index, allow_repetition, consider_depth):
         criteria = []
-        scale_ratio = (max(self.depths) - min(self.depths)) / (max(self.differences) - min(self.differences))
-        scale_adjust = max(self.depths) - scale_ratio * max(self.depths)
-        criteria += [self.differences[individual_index]]  # / self.target_result]  # * scale_ratio + scale_adjust]
+        criteria += [self.differences[individual_index]]
         criteria_number = 1
         if consider_depth:
             criteria += [self.depths[individual_index]]
@@ -121,7 +120,7 @@ class TreeGeneticAlgorithm:
         self.depths = []
         self.differences = []
         self.depths = [ind.get_depth() for ind in self.population]
-        self.differences = [abs(ind.eval() - self.target_result) for ind in self.population]
+        self.differences = [abs(ind.eval(self.variables) - self.target_result) for ind in self.population]
 
     def ind_has_repeated_terminals(self, individual_index):
         terminals = [x for x in self.population[individual_index].serialize() if isinstance(x, TerminalNode)]
