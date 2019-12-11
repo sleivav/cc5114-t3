@@ -103,7 +103,7 @@ class TreeGeneticAlgorithm:
         criteria += [self.differences[individual_index]]
         criteria_number = 1
         if consider_depth:
-            criteria += [self.depths[individual_index] if self.depths[individual_index] < 15 else 10000]
+            criteria += [self.depths[individual_index]] # if self.depths[individual_index] < 15 else 100000]
             criteria_number += 1
         if not allow_repetition:
             has_repeated_terminals = self.ind_has_repeated_terminals(individual_index)
@@ -122,7 +122,6 @@ class TreeGeneticAlgorithm:
         self.depths = [ind.get_depth() for ind in self.population]
         if function is not None:
             self.differences = [sum(abs(ind.eval({'x': x}) - function(x)) for x in range(-100, 101)) for ind in self.population]
-            print('b')
         else:
             self.differences = [abs(ind.eval(self.variables) - self.target_result) for ind in self.population]
 

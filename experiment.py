@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib import colors
 
 from genetic_algorithm import TreeGeneticAlgorithm, Tournament
-from lib.arboles import SubNode, AddNode, MultNode, MaxNode
+from lib.arboles import SubNode, AddNode, MultNode, MaxNode, DivisionNode
 
 
 class Experiment:
@@ -28,7 +28,6 @@ class Experiment:
         self.allow_repetitions = allow_repetitions
         self.variables = variables
         self.function = function
-        print('a')
 
     def run_experiment(self, create_heatmap=True):
         for i, population_size in enumerate(self.population_sizes):
@@ -61,9 +60,8 @@ class Experiment:
             genetic_algorithm_instance.reproduce()
             genetic_algorithm_instance.evaluate_fitness(self.allow_repetitions, self.consider_depth, self.function)
             iterations += 1
-            if iterations % 100 == 0:
-                print('a')
-            if iterations >= max_iterations:
+            if iterations >= max_iterations or (min(genetic_algorithm_instance.differences) == 0 and create_heatmap):
+                print(iterations)
                 break
         if not create_heatmap:
             fitness_list = genetic_algorithm_instance.fitness_list
@@ -97,7 +95,7 @@ class Experiment:
         plt.xlabel('Ratio de mutaciones')
         plt.ylabel('Tamaño de la población')
         plt.colorbar(heatmap)
-        plt.savefig('img/heatmap.png')
+        plt.savefig('outputs/heatmap.png')
         plt.show()
 
     def graph_evolution(self):
@@ -129,34 +127,40 @@ if __name__ == '__main__':
     maze = None
     if args.heatmap:
         population_sizes = range(50, 1000, 50)
-        mutation_rates = [float(x/100.0) for x in range(0, 10, 1)]
+        mutation_rates = [float(x/10.0) for x in range(0, 10, 1)]
     elif args.evolution_graph:
         population_sizes = [100]
         mutation_rates = [0.1]
-    if args.problem == 'consider_depth':
+    if args.problem == 'find_number':
         experiment = Experiment(population_sizes, mutation_rates, 65346, TreeGeneticAlgorithm, Tournament(5),
                                 [SubNode, AddNode, MaxNode, MultNode], [25, 7, 8, 100, 4, 2], False, True)
         experiment.run_experiment(args.heatmap)
         experiment.graph(args.heatmap)
+    elif args.problem == 'consider_depth':
+        experiment = Experiment(population_sizes, mutation_rates, 65346, TreeGeneticAlgorithm, Tournament(5),
+                                [SubNode, AddNode, MaxNode, MultNode], [25, 7, 8, 100, 4, 2], True, True)
+        experiment.run_experiment(args.heatmap)
+        experiment.graph(args.heatmap)
     elif args.problem == 'consider_repetitions':
         experiment = Experiment(population_sizes, mutation_rates, 65346, TreeGeneticAlgorithm, Tournament(5),
-                                [SubNode, AddNode, MaxNode, MultNode], [25, 7, 8, 100, 4, 2], False, False)
+                                [SubNode, AddNode, MaxNode, MultNode], [25, 7, 8, 100, 4, 2], True, False)
         experiment.run_experiment(args.heatmap)
         experiment.graph(args.heatmap)
     elif args.problem == 'include_variables':
         experiment = Experiment(population_sizes, mutation_rates, 65346, TreeGeneticAlgorithm, Tournament(5),
-                                [SubNode, AddNode, MaxNode, MultNode], [25, 7, 8, 100, 4, 2, 'x'], False, False, {'x': 6})
+                                [SubNode, AddNode, MaxNode, MultNode], [25, 7, 8, 100, 4, 2, 'x'], True, False, {'x': 6})
         experiment.run_experiment(args.heatmap)
         experiment.graph(args.heatmap)
     elif args.problem == 'symbolic_regression':
         experiment = Experiment(population_sizes, mutation_rates, 65346, TreeGeneticAlgorithm, Tournament(5),
-                                [SubNode, AddNode, MultNode], list(range(-10, 11)) + 20 * ['x'], False, True, None,
+                                [SubNode, AddNode, MultNode], list(range(-10, 11)) + 20 * ['x'], True, True, None,
                                 function=lambda x: x**2 + x - 6)
         experiment.run_experiment(args.heatmap)
         experiment.graph(args.heatmap)
-    elif args.problem == 'maze':
-        _, solution = maze.get_shortest_path()
-        experiment = Experiment(population_sizes, mutation_rates, solution, TreeGeneticAlgorithm,
-                                Tournament(5))
+    elif args.problem == 'division_by_zero':
+        experiment = Experiment(population_sizes, mutation_rates, 65346, TreeGeneticAlgorithm, Tournament(5),
+                                [SubNode, AddNode, MultNode, DivisionNode], list(range(-10, 11)) + 20 * ['x'], True, True, None,
+                                function=lambda x: x**2 + x - 6)
         experiment.run_experiment(args.heatmap)
+        experiment.graph(args.heatmap)
     print('done')

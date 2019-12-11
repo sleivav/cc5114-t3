@@ -1,3 +1,7 @@
+"""
+Basado en el código entregado por Juan-Pablo Silva, el auxiliar del ramo
+"""
+
 # para crear copias de los arboles
 from copy import deepcopy
 # random
@@ -125,7 +129,20 @@ class MultNode(BinaryNode):
         
     def __repr__(self):
         return "({} * {})".format(*self.arguments)
-    
+
+
+class DivisionNode(BinaryNode):
+    def __init__(self, left, right):
+        def _div(x, y):
+            try:
+                return x / y
+            except ZeroDivisionError:
+                return 100000000
+
+        super(DivisionNode, self).__init__(_div, left, right)
+
+    def __repr__(self):
+        return "({} / {})".format(*self.arguments)
     
 class TerminalNode(Node):
     # Este nodo representa una hoja de arbol. Es el nodo terminal
